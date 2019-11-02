@@ -1,7 +1,7 @@
 {
   "name": "minigolf",
   "version": "1.0.0",
-  "description": "Minigolf using TypeScript and WebGL",
+  "description": "Minigolf made using TypeScript and WebGL",
   "private": true,
   "dependencies": {
     "ts-loader": "^6.2.1",

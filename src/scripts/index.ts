@@ -3,7 +3,7 @@ import '../styles/styles.scss';
 import { Engine } from './engine/Engine';
 
 window.onload = () => {
-    const engine = new Engine(document.getElementById('game') as HTMLCanvasElement);
+    const engine = new Engine('game');
     engine.start();
 };
 
