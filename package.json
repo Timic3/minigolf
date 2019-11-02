@@ -24,6 +24,6 @@
     "start": "webpack-dev-server --open",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Timotej M.",
+  "author": "Timotej M. & Tilen P.",
   "license": "ISC"
 }

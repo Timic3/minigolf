@@ -1,10 +1,10 @@
-import { GL, gl } from './utils/GL';
+import { WebGL, gl } from './utils/WebGL';
 
 export class Engine {
     private _canvas: HTMLCanvasElement;
 
     public constructor(elementId: string) {
-        this._canvas = GL.initialize(elementId);
+        this._canvas = WebGL.initialize(elementId);
         window.onresize = this.resize;
     }
 

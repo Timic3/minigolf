@@ -1,6 +1,6 @@
 export let gl: WebGL2RenderingContext;
 
-export class GL {
+export class WebGL {
 
     public static initialize(elementId: string): HTMLCanvasElement {
         const canvas = document.getElementById(elementId) as HTMLCanvasElement;
