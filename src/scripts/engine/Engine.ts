@@ -1,4 +1,7 @@
 import { WebGL, gl } from './utils/WebGL';
+import { Shader } from './utils/Shader';
+
+import * as BasicShader from './shaders/Basic';
 
 export class Engine {
     private _canvas: HTMLCanvasElement;
@@ -10,6 +13,10 @@ export class Engine {
 
     public start() {
         gl.clearColor(0, 0, 0, 1);
+        
+        const basicShader = new Shader(BasicShader.vertexSource, BasicShader.fragmentSource);
+        basicShader.use();
+
         this.loop();
     }
 
@@ -17,6 +24,7 @@ export class Engine {
         if (this._canvas !== undefined) {
             this._canvas.width = window.innerWidth;
             this._canvas.height = window.innerHeight;
+            gl.viewport(0, 0, this._canvas.width, this._canvas.height);
         }
     }
 
