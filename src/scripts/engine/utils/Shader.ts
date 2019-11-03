@@ -4,8 +4,8 @@ export class Shader {
     private _program: WebGLProgram;
 
     public constructor(vertexSource: string, fragmentSource: string) {
-        let vertexShader = this.loadShader(vertexSource, gl.VERTEX_SHADER);
-        let fragmentShader = this.loadShader(fragmentSource, gl.FRAGMENT_SHADER);
+        const vertexShader = this.loadShader(vertexSource, gl.VERTEX_SHADER);
+        const fragmentShader = this.loadShader(fragmentSource, gl.FRAGMENT_SHADER);
 
         this._program = gl.createProgram();
 

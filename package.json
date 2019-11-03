@@ -3,18 +3,20 @@
   "version": "1.0.0",
   "description": "Minigolf made using TypeScript and WebGL",
   "private": true,
-  "dependencies": {
-    "ts-loader": "^6.2.1",
-    "typescript": "^3.6.4"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.6.0",
+    "@typescript-eslint/parser": "^2.6.0",
     "clean-webpack-plugin": "^3.0.0",
     "cross-env": "^6.0.3",
     "css-loader": "^3.2.0",
+    "eslint": "^6.6.0",
     "html-webpack-plugin": "^3.2.0",
     "node-sass": "^4.13.0",
     "sass-loader": "^8.0.0",
     "style-loader": "^1.0.0",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.6.4",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
     "webpack-dev-server": "^3.9.0"
@@ -22,6 +24,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack -p --colors",
     "start": "webpack-dev-server --open",
+    "lint": "eslint . --ext .ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Timotej M. & Tilen P.",
