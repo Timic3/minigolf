@@ -1,5 +1,6 @@
 {
   "eslint.validate": [
+    /*
     {
       "language": "typescript",
       "autoFix": true
@@ -8,8 +9,11 @@
       "language": "javascript",
       "autoFix": true
     }
+    */
   ],
-  "eslint.autoFixOnSave": false,
+  "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": false
+  },
   "editor.formatOnSave": false,
   "vetur.validation.template": false,
   "editor.tabSize": 4,
