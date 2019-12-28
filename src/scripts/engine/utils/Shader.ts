@@ -1,7 +1,17 @@
 import { gl } from './WebGL';
 
+interface Attribute {
+    [name: string]: number;
+}
+
+interface Uniform {
+    [name: string]: WebGLUniformLocation;
+}
+
 export class Shader {
     private _program: WebGLProgram;
+    private _attributes: Attribute = {};
+    private _uniforms: Uniform = {};
 
     public constructor(vertexSource: string, fragmentSource: string) {
         const vertexShader = this.loadShader(vertexSource, gl.VERTEX_SHADER);
@@ -18,10 +28,36 @@ export class Shader {
         if (!gl.getProgramParameter(this._program, gl.LINK_STATUS)) {
             throw new Error(`Program link failed\n${gl.getProgramInfoLog(this._program)}`);
         }
+
+        // Get all active attributes and put them into dictionary
+        for (let i = 0; i < gl.getProgramParameter(this._program, gl.ACTIVE_ATTRIBUTES); ++i) {
+            const info: WebGLActiveInfo = gl.getActiveAttrib(this._program, i);
+            this._attributes[info.name] = gl.getAttribLocation(this._program, info.name);
+        }
+
+        // Get all active uniforms and put them into dictionary
+        for (let i = 0; i < gl.getProgramParameter(this._program, gl.ACTIVE_UNIFORMS); ++i) {
+            const info: WebGLActiveInfo = gl.getActiveUniform(this._program, i);
+            this._uniforms[info.name] = gl.getUniformLocation(this._program, info.name);
+        }
     }
 
     public use() {
         gl.useProgram(this._program);
+    }
+
+    public getAttributeLocation(name: string): number {
+        if (this._attributes[name] === undefined) {
+            throw new Error(`Attribute location '${name}' not found`);
+        }
+        return this._attributes[name];
+    }
+
+    public getUniformLocation(name: string): WebGLUniformLocation {
+        if (this._uniforms[name] === undefined) {
+            throw new Error(`Uniform location '${name}' not found`);
+        }
+        return this._uniforms[name];
     }
 
     private loadShader(source: string, shaderType: number): WebGLShader {
