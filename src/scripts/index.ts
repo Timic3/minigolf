@@ -2,7 +2,7 @@ import '../styles/styles.scss';
 
 import { Engine } from './engine/Engine';
 
-window.onload = () => {
+window.onload = async () => {
     const engine = new Engine('game');
     engine.start();
 };

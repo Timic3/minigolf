@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -9,8 +10,10 @@ module.exports = {
   entry: './src/scripts/index.ts',
   devtool: 'inline-source-map',
   output: {
+    //path: path.join(__dirname, 'dist/'),
     filename: 'js/[name].bundle.js',
     chunkFilename: 'js/[name].chunk.js',
+    //publicPath: '/assets',
   },
   devServer: {
     contentBase: './dist',
@@ -19,13 +22,17 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.tsx?$/i,
         use: 'ts-loader',
         exclude: /node_modules/,
       },
       {
-        test: /\.s[ac]ss$/,
+        test: /\.s[ac]ss$/i,
         use: ['style-loader', 'css-loader?sourceMap=true', 'sass-loader'],
+      },
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        loader: "file-loader?name=/assets/[name].[ext]",
       },
     ],
   },
@@ -36,6 +43,9 @@ module.exports = {
       template: path.resolve(__dirname, 'src/index.html'),
       filename: 'index.html',
     }),
+    new CopyWebpackPlugin([
+      { from: './src/assets', to: 'assets' }
+    ]),
   ],
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ],

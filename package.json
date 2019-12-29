@@ -4,16 +4,21 @@
   "description": "Minigolf made using TypeScript and WebGL",
   "private": true,
   "dependencies": {
-    "gl-matrix": "^3.1.0"
+    "@loaders.gl/core": "^2.0.0",
+    "@loaders.gl/gltf": "^2.0.0",
+    "gl-matrix": "^3.1.0",
+    "gltf-loader-ts": "^0.3.1"
   },
   "devDependencies": {
     "@types/gl-matrix": "^2.4.5",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.13.0",
     "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^5.1.1",
     "cross-env": "^6.0.3",
     "css-loader": "^3.4.0",
     "eslint": "^6.8.0",
+    "file-loader": "^5.0.2",
     "html-webpack-plugin": "^3.2.0",
     "node-sass": "^4.13.0",
     "sass-loader": "^8.0.0",
