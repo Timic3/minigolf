@@ -1,14 +1,13 @@
 export const vertexSource = `#version 300 es
-in vec3 aPosition;
-in vec2 aTexCoord;
-uniform mat4 uWorld;
-uniform mat4 uView;
-uniform mat4 uProjection;
+layout (location = 0) in vec3 aPosition;
+layout (location = 2) in vec2 aTexCoord;
+uniform mat4 umView;
+uniform mat4 umProjection;
 out vec2 vTexCoord;
 
 void main() {
     vTexCoord = aTexCoord;
-    gl_Position = uProjection * uView * uWorld * vec4(aPosition, 1.0);
+    gl_Position = umProjection * umView * vec4(aPosition, 1.0);
 }
 `;
 

@@ -1,12 +1,14 @@
 export const vertexSource = `#version 300 es
 layout (location = 0) in vec3 aPosition;
+layout (location = 1) in vec3 aNormal;
+layout (location = 2) in vec2 aTexCoord;
 uniform mat4 umWorld;
 uniform mat4 umView;
 uniform mat4 umProjection;
-out vec4 vColor;
+out vec2 vTexCoord;
 
 void main() {
-    vColor = vec4(0.0, 1.0, 0.0, 1.0);
+    vNormal = mat3();
     gl_Position = umProjection * umView * umWorld * vec4(aPosition, 1.0);
 }
 `;
@@ -14,11 +16,12 @@ void main() {
 export const fragmentSource = `#version 300 es
 precision mediump float;
 
-in vec4 vColor;
+in vec2 vTexCoord;
 
 out vec4 outColor;
+uniform sampler2D uSampler;
 
 void main() {
-    outColor = vColor;
+    outColor = texture(uSampler, vTexCoord);
 }
 `;

@@ -1,16 +1,31 @@
 import { WebGL, gl } from './utils/WebGL';
+import { Shader } from './utils/Shader';
+// import * as BasicShader from './shaders/Basic';
+import * as TextureShader from './shaders/Texture';
 
-import { Entity } from './utils/Entity';
 import { mat4, glMatrix } from 'gl-matrix';
+import OrbitalCamera from '../OrbitalCamera';
+import { Entity } from './utils/Entity';
+
+const load = require('@loaders.gl/core').load;
+const GLTFLoader = require('@loaders.gl/gltf').GLTFLoader;
 
 export class Engine {
     private _canvas: HTMLCanvasElement;
 
-    private _object: Entity;
+    private _entity: Entity;
+
+    private _pMatrix: mat4 = mat4.create();
+    private _vMatrix: mat4 = mat4.identity(mat4.create());
+    private _wMatrix: mat4 = mat4.identity(mat4.create());
+
+    private _orbitalController = new OrbitalCamera(this._wMatrix);
 
     public constructor(elementId: string) {
         this._canvas = WebGL.initialize(elementId);
+
         window.onresize = this.resize;
+
         this.resize();
     }
 
@@ -22,13 +37,12 @@ export class Engine {
         gl.frontFace(gl.CCW); // Vertices are appearing counter-clockwise
         gl.cullFace(gl.BACK); // Get rid of the back side
 
-        this._object = new Entity('http://localhost:8080/assets/avocado.glb');
-        
-        const projectionMatrix = mat4.create();
-        mat4.perspective(projectionMatrix, glMatrix.toRadian(45), this._canvas.width / this._canvas.height, 0.1, 1000.0);
-        this._object.setProjectionMatrix(projectionMatrix);
+        this._entity = new Entity("http://localhost:8080/assets/golf-court.glb");
 
-        this.loop();
+        mat4.perspective(this._pMatrix, glMatrix.toRadian(45), window.innerWidth / window.innerHeight, 0.1, 1000.0);
+
+        this.loop = this.loop.bind(this);
+        requestAnimationFrame(this.loop);
     }
 
     private resize() {
@@ -44,8 +58,12 @@ export class Engine {
         gl.clearColor(0.5, 0.5, 0.5, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        this._object.draw();
+        this._orbitalController.update();
 
-        requestAnimationFrame(this.loop.bind(this));
+        mat4.perspective(this._pMatrix, glMatrix.toRadian(45), window.innerWidth / window.innerHeight, 0.1, 1000.0);
+        this._entity.setProjectionMatrix(this._pMatrix);
+        this._entity.draw(this._wMatrix);
+
+        requestAnimationFrame(this.loop);
     }
 }
