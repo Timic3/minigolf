@@ -13,7 +13,8 @@ const GLTFLoader = require('@loaders.gl/gltf').GLTFLoader;
 export class Engine {
     private _canvas: HTMLCanvasElement;
 
-    private _entity: Entity;
+    private _scene: Entity;
+    private _ball: Entity;
 
     private _pMatrix: mat4 = mat4.create();
     private _vMatrix: mat4 = mat4.identity(mat4.create());
@@ -33,11 +34,12 @@ export class Engine {
         gl.clearColor(0.5, 0.5, 0.5, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.enable(gl.DEPTH_TEST); // Draw nearest vertices first
-        gl.enable(gl.CULL_FACE); // Rasterizer, despite depth test, still checks behind these vertices - culling prevents that
+        //gl.enable(gl.CULL_FACE); // Rasterizer, despite depth test, still checks behind these vertices - culling prevents that
         gl.frontFace(gl.CCW); // Vertices are appearing counter-clockwise
         gl.cullFace(gl.BACK); // Get rid of the back side
 
-        this._entity = new Entity("http://localhost:8080/assets/golf-court.glb");
+        this._scene = new Entity("assets/golf_court.glb");
+        //this._ball = new Entity("assets/ball.glb");
 
         mat4.perspective(this._pMatrix, glMatrix.toRadian(45), window.innerWidth / window.innerHeight, 0.1, 1000.0);
 
@@ -58,11 +60,13 @@ export class Engine {
         gl.clearColor(0.5, 0.5, 0.5, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+        //this._ball.draw(this._wMatrix, this._orbitalController._vec);
+
         this._orbitalController.update();
 
         mat4.perspective(this._pMatrix, glMatrix.toRadian(45), window.innerWidth / window.innerHeight, 0.1, 1000.0);
-        this._entity.setProjectionMatrix(this._pMatrix);
-        this._entity.draw(this._wMatrix);
+        this._scene.setProjectionMatrix(this._pMatrix);
+        this._scene.draw(this._wMatrix, this._orbitalController._vec, this._orbitalController);
 
         requestAnimationFrame(this.loop);
     }

@@ -82,6 +82,9 @@ class OrbitalCamera {
 		this._isZoomLocked = mValue;
 	}
 
+    center(mValue) {
+        mat4.getTranslation(this.center, mValue);
+    }
 
 	_onWheel(e) {
 		if(this._isZoomLocked) {
@@ -163,8 +166,8 @@ class OrbitalCamera {
 
 		if(this._mtxTarget) {
 			mat4.copy(this._mtxTarget, this._mtx);
-		}
-	}
+        }
+    }
 
 }
 

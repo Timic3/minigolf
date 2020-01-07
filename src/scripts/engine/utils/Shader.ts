@@ -13,9 +13,23 @@ export class Shader {
     private _attributes: Attribute = {};
     private _uniforms: Uniform = {};
 
+    private _headers = '#version 300 es\n\n';
+
+    private _vertexSource: string;
+    private _fragmentSource: string;
+
     public constructor(vertexSource: string, fragmentSource: string) {
-        const vertexShader = this.loadShader(vertexSource, gl.VERTEX_SHADER);
-        const fragmentShader = this.loadShader(fragmentSource, gl.FRAGMENT_SHADER);
+        this._vertexSource = vertexSource;
+        this._fragmentSource = fragmentSource;
+    }
+
+    public define(header: string) {
+        this._headers += "#define " + header + '\n';
+    }
+
+    public build() {
+        const vertexShader = this.loadShader(this._headers + this._vertexSource, gl.VERTEX_SHADER);
+        const fragmentShader = this.loadShader(this._headers + this._fragmentSource, gl.FRAGMENT_SHADER);
 
         this._program = gl.createProgram();
 
@@ -68,7 +82,7 @@ export class Shader {
 
         // Check compilation errors
         if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-            throw new Error(`Shader compilation failed (${shaderType})\n${gl.getShaderInfoLog(shader)}`);
+            throw new Error(`Shader compilation failed (${shaderType === gl.VERTEX_SHADER ? 'VERTEX_SHADER' : 'FRAGMENT_SHADER'})\n${gl.getShaderInfoLog(shader)}`);
         }
 
         return shader;

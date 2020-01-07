@@ -1,17 +1,17 @@
-export const vertexSource = `#version 300 es
+export const vertexSource = `
 layout (location = 0) in vec3 aPosition;
 layout (location = 2) in vec2 aTexCoord;
-uniform mat4 umView;
-uniform mat4 umProjection;
+uniform mat4 uView;
+uniform mat4 uProjection;
 out vec2 vTexCoord;
 
 void main() {
     vTexCoord = aTexCoord;
-    gl_Position = umProjection * umView * vec4(aPosition, 1.0);
+    gl_Position = uProjection * uView * vec4(aPosition, 1.0);
 }
 `;
 
-export const fragmentSource = `#version 300 es
+export const fragmentSource = `
 precision mediump float;
 
 in vec2 vTexCoord;
