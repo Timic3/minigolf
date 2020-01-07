@@ -88,7 +88,7 @@ export class Entity {
 
             if (node.name === 'Golf_zogica') {
                 mat4.translate(node.transform, node.transform, vec3.fromValues(0, 0, 1));
-                orbit.center(node.transform);
+                //mat4.getTranslation(orbit.center, node.transform);
             }
 
             for (const primitive of node.primitives) {
