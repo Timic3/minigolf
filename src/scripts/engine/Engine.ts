@@ -7,10 +7,14 @@ import { mat4, glMatrix } from 'gl-matrix';
 import OrbitalCamera from '../OrbitalCamera';
 import { Entity } from './utils/Entity';
 
+import * as CANNON from 'cannon';
+
 const load = require('@loaders.gl/core').load;
 const GLTFLoader = require('@loaders.gl/gltf').GLTFLoader;
 
 export class Engine {
+    static TIME_STEP = 1.0 / 60.0;
+
     private _canvas: HTMLCanvasElement;
 
     private _scene: Entity;
@@ -22,10 +26,15 @@ export class Engine {
 
     private _orbitalController = new OrbitalCamera(this._wMatrix);
 
+    private _lastTime;
+    private _world = new CANNON.World();
+
     public constructor(elementId: string) {
         this._canvas = WebGL.initialize(elementId);
 
         window.onresize = this.resize;
+
+        this._world.gravity.set(0, 0, -9.82);
 
         this.resize();
     }
@@ -52,22 +61,27 @@ export class Engine {
             this._canvas.width = window.innerWidth;
             this._canvas.height = window.innerHeight;
             gl.viewport(0, 0, this._canvas.width, this._canvas.height);
+            mat4.perspective(this._pMatrix, glMatrix.toRadian(45), this._canvas.width / this._canvas.height, 0.1, 1000.0);
         }
     }
 
-    private loop() {
+    private loop(time) {
         // Clear the color buffer of the screen, otherwise we draw each frame on top of each other.
         gl.clearColor(0.5, 0.5, 0.5, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        if (this._lastTime !== undefined) {
+            this._world.step(Engine.TIME_STEP, (time - this._lastTime) / 1000, 3);
+        }
 
         //this._ball.draw(this._wMatrix, this._orbitalController._vec);
 
         this._orbitalController.update();
 
-        mat4.perspective(this._pMatrix, glMatrix.toRadian(45), window.innerWidth / window.innerHeight, 0.1, 1000.0);
         this._scene.setProjectionMatrix(this._pMatrix);
         this._scene.draw(this._wMatrix, this._orbitalController._vec, this._orbitalController);
 
+        this._lastTime = time;
         requestAnimationFrame(this.loop);
     }
 }

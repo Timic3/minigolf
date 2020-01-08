@@ -6,10 +6,12 @@
   "dependencies": {
     "@loaders.gl/core": "^2.0.0",
     "@loaders.gl/gltf": "^2.0.0",
+    "cannon": "^0.6.2",
     "gl-matrix": "^3.1.0",
     "gltf-loader-ts": "^0.3.1"
   },
   "devDependencies": {
+    "@types/cannon": "^0.1.4",
     "@types/gl-matrix": "^2.4.5",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.13.0",
