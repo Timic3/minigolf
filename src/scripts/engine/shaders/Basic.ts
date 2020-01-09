@@ -727,7 +727,7 @@ void main()
 #endif
 
     // LIGHTING
-    vec3 color = vec3(0.0, 0.0, 0.0);
+    vec3 color = vec3(baseColor.r * 0.15, baseColor.g * 0.15, baseColor.b * 0.15);
     vec3 normal = getNormal();
     vec3 view = normalize(uCamera - vPosition);
 
@@ -786,7 +786,7 @@ void main()
 
 #ifndef DEBUG_OUTPUT // no debug
 
-   // regular shading
+    // regular shading
     output_color = vec4(toneMap(color), baseColor.a);
 
 #else // debug output

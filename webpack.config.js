@@ -9,6 +9,9 @@ module.exports = {
   // mode: 'production',
   entry: './src/scripts/index.ts',
   devtool: 'inline-source-map',
+  node: {
+      fs: 'empty'
+  },
   output: {
     //path: path.join(__dirname, 'dist/'),
     filename: 'js/[name].bundle.js',

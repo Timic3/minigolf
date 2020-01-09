@@ -6,9 +6,10 @@
   "dependencies": {
     "@loaders.gl/core": "^2.0.0",
     "@loaders.gl/gltf": "^2.0.0",
+    "ammo.js": "github:kripken/ammo.js",
     "cannon": "^0.6.2",
     "gl-matrix": "^3.1.0",
-    "gltf-loader-ts": "^0.3.1"
+    "orbit-controls": "^1.2.4"
   },
   "devDependencies": {
     "@types/cannon": "^0.1.4",

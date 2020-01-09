@@ -9,7 +9,10 @@ import { mat4, vec3 } from "gl-matrix";
 export class Primitive {
     private _vao: WebGLVertexArrayObject;
     private _shader: Shader;
-    private _indices: number;
+    private _indicesSize: number;
+
+    private _vertices: Float32Array;
+    private _indices: Uint16Array;
 
     private _doubleSided = false;
     private _alphaMode = 'OPAQUE';
@@ -19,7 +22,11 @@ export class Primitive {
         const normals = primitive.attributes.NORMAL;
         const texcoords = primitive.attributes.TEXCOORD_0;
         const colors = primitive.attributes.COLOR_0;
+        const indices = primitive.indices;
         const material = primitive.material;
+
+        this._vertices = vertices.value;
+        this._indices = indices.value;
         
         this._shader = new Shader(BasicShader.vertexSource, BasicShader.fragmentSource);
         if (material) {
@@ -82,8 +89,7 @@ export class Primitive {
         gl.bindTexture(gl.TEXTURE_2D, null);*/
 
         // Indices
-        const indices = primitive.indices;
-        this._indices = indices.count;
+        this._indicesSize = indices.count;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices.value, gl.STATIC_DRAW);
 
@@ -119,6 +125,14 @@ export class Primitive {
         }
     }
 
+    public getVertices() {
+        return this._vertices;
+    }
+
+    public getIndices() {
+        return this._indices;
+    }
+
     draw(projectionMatrix, viewMatrix, modelMatrix, cameraPosition) {
         this._shader.use();
 
@@ -151,6 +165,7 @@ export class Primitive {
 
         //gl.activeTexture(gl.TEXTURE0);
         //gl.bindTexture(gl.TEXTURE_2D, this._nodes[0].texture);
-        gl.drawElements(gl.TRIANGLES, this._indices, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, this._indicesSize, gl.UNSIGNED_SHORT, 0);
+        //gl.drawArrays(gl.LINE_STRIP, 0, this._vertices.length / 3);
     }
 }
