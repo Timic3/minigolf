@@ -64,7 +64,23 @@ export class Entity {
                         // Small optimisation
                         engine.generateConvexCollision(translation, rotation, scale, mesh.getVertices());
                     } else if (node.name !== 'Golf_zogica') {
-                        engine.generateConcaveCollision(translation, rotation, scale, mesh.getVertices(), mesh.getIndices());
+                        if (node.name.substring(0, 6) === 'Luknja') {
+                            engine.generateConcaveCollision(
+                                translation,
+                                rotation,
+                                scale,
+                                mesh.getVertices(),
+                                mesh.getIndices(),
+                                +node.name.replace('Luknja', ''));
+                        } else {
+                            engine.generateConcaveCollision(
+                                translation,
+                                rotation,
+                                scale,
+                                mesh.getVertices(),
+                                mesh.getIndices()
+                            );
+                        }
                     }
                     node.primitives.push(mesh);
                 }

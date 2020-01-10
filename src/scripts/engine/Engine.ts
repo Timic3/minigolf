@@ -11,7 +11,7 @@ const controls = require('orbit-controls')();
 let Ammo: any;
 
 enum State {
-    WAITING, MOVING, SHOOT
+    WAITING, MOVING, SHOOT, FINISHING
 }
 
 export class Engine {
@@ -97,7 +97,7 @@ export class Engine {
         this.prepareLevel();
     }
 
-    public generateConcaveCollision(position, rotation, scale, vertices, indices) {
+    public generateConcaveCollision(position, rotation, scale, vertices, indices, hole = false) {
         const transform = new Ammo.btTransform();
         transform.setIdentity();
         transform.setOrigin(new Ammo.btVector3(position[0], position[1], position[2]));
@@ -129,6 +129,18 @@ export class Engine {
         object.setRestitution(1);
         //object.setFriction(1);
         //object.setRollingFriction(0.1);
+
+        if (hole) {
+            const minAABB = new Ammo.btVector3();
+            const maxAABB = new Ammo.btVector3();
+            object.getAabb(minAABB, maxAABB);
+            //console.log(minAABB.x(), minAABB.y(), minAABB.z());
+            //console.log(maxAABB.x(), maxAABB.y(), maxAABB.z());
+            Levels.ALL[(hole as any) - 1].holeAABB = [
+                [minAABB.x(), minAABB.y(), minAABB.z()],
+                [maxAABB.x(), maxAABB.y(), maxAABB.z()],
+            ];
+        }
 
         this._physicsWorld.addRigidBody(object);
     }
@@ -204,18 +216,34 @@ export class Engine {
             controls.target[1] - controls.direction[1],
             controls.target[2] - controls.direction[2]
         ];
+        
+        const transform = new Ammo.btTransform();
+        transform.setIdentity();
+        transform.setOrigin(
+            new Ammo.btVector3(
+                Levels.ALL[Levels.CURRENT].spawnpoint[0],
+                Levels.ALL[Levels.CURRENT].spawnpoint[1],
+                Levels.ALL[Levels.CURRENT].spawnpoint[2]
+            )
+        );
+        transform.setRotation(new Ammo.btQuaternion(0, 0, 0, 1));
+        
+        this._sphere.setWorldTransform(transform);
+        this._sphere.getMotionState().setWorldTransform(transform);
+
+        this._sphere.setLinearVelocity(new Ammo.btVector3(0, 0, 0));
+        this._sphere.setAngularVelocity(new Ammo.btVector3(0, 0, 0));
+
+        this._scene.update(controls.target, [0, 0, 0, 1]);
         controls.update();
-        const motionState = this._sphere.getMotionState();
-        if (motionState) {
-            motionState.getWorldTransform(this._transformCache[1]);
-            this._transformCache[1].setOrigin(new Ammo.btVector3(Levels.ALL[Levels.CURRENT].spawnpoint));
-            this._transformCache[1].setRotation(new Ammo.btQuaternion(Levels.ALL[Levels.CURRENT].direction));
-            this._scene.update(controls.target, [0, 0, 0, 1]);
-        }
+        this._state = State.SHOOT;
     }
 
-    private checkHoleAABB() {
-        
+    private isBallInHole() {
+        const AABB = Levels.ALL[Levels.CURRENT].holeAABB;
+        return  (controls.target[0] >= AABB[0][0] && controls.target[0] <= AABB[1][0]) &&
+                (controls.target[1] >= AABB[0][1] && controls.target[1] <= AABB[1][1] - 0.15) &&
+                (controls.target[2] >= AABB[0][2] && controls.target[2] <= AABB[1][2]);
     }
 
     private resize() {
@@ -233,6 +261,7 @@ export class Engine {
         }
         if (e.code === 'KeyT') {
             this._sphere.setLinearVelocity(new Ammo.btVector3(controls.direction[0] * 5, 0, controls.direction[2] * 5));
+            this._state = State.MOVING;
         } else if (e.code === 'Space') {
             this._sphere.setLinearVelocity(new Ammo.btVector3(0, 5, 0));
         } else if (e.code === 'KeyR') {
@@ -268,18 +297,25 @@ export class Engine {
             const motionState = this._sphere.getMotionState();
             if (motionState) {
                 motionState.getWorldTransform(this._transformCache[0]);
-                const p = this._transformCache[0].getOrigin();
-                const r = this._transformCache[0].getRotation();
-                controls.target = [p.x(), p.y(), p.z()];
-                this._scene.update(controls.target, [r.x(), r.y(), r.z(), r.w()]);
-            }
-
-            if (this._state === State.MOVING && this._sphere.getLinearVelocity().dot(this._sphere.getAngularVelocity())) {
-                this._state = State.WAITING;
-                this.checkHoleAABB();
+                const position = this._transformCache[0].getOrigin();
+                const rotation = this._transformCache[0].getRotation();
+                controls.target = [position.x(), position.y(), position.z()];
+                this._scene.update(controls.target, [rotation.x(), rotation.y(), rotation.z(), rotation.w()]);
             }
 
             controls.update();
+
+            if (this._state === State.MOVING) {
+                if (this.isBallInHole()) {
+                    this._state = State.FINISHING;
+                    if (++Levels.CURRENT >= Levels.ALL.length) {
+                        Levels.CURRENT = 0;
+                    }
+                    this.prepareLevel();
+                } else if (this._sphere.getLinearVelocity().dot(this._sphere.getAngularVelocity()) === 0) {
+                    this._state = State.SHOOT;
+                }
+            }
         } else {
             if (controls.position[0] > -216) { // -216.25000000001847, 10, -36.24999999999767
                 controls.position[0] -= 0.01;
