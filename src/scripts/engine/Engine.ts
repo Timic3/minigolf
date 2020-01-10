@@ -24,7 +24,7 @@ export class Engine {
 
     private _physicsWorld;
     private _currentTransformation;
-
+    private _vectorCache;
 
     public constructor(elementId: string) {
         this._canvas = WebGL.initialize(elementId);
@@ -42,7 +42,7 @@ export class Engine {
         controls.phiBounds = [0.001, Math.PI / 2];
         controls.zoomSpeed = 0.001;
 
-        controls.position = [-100, 10, 80];
+        controls.position = [-100, 20, 80];
 
         this.resize();
     }
@@ -54,6 +54,9 @@ export class Engine {
         const solver = new Ammo.btSequentialImpulseConstraintSolver();
         this._physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
         this._physicsWorld.setGravity(new Ammo.btVector3(0, -9.82, 0));
+
+        this._currentTransformation = new Ammo.btTransform();
+        this._vectorCache = [new Ammo.btVector3(), new Ammo.btVector3(), new Ammo.btVector3()];
     }
 
     public async start(ammo) {
@@ -64,17 +67,16 @@ export class Engine {
         gl.cullFace(gl.BACK);
 
         Ammo = ammo;
-        this._currentTransformation = new Ammo.btTransform();
 
         this.initPhysics();
 
         UI.flow('loading', 'Scene and collisions');
+        console.time('Scene and collisions');
         this._scene = new Entity();
         await this._scene.initialize("assets/golf_court.glb", this);
-        //this._ball = new Entity();
-        //await this._scene.initialize("assets/ball.glb", this);
 
         this.generateBallCollision();
+        console.timeEnd('Scene and collisions');
 
         mat4.perspective(this._pMatrix, glMatrix.toRadian(45), window.innerWidth / window.innerHeight, 0.1, 1000.0);
 
@@ -93,14 +95,17 @@ export class Engine {
 
         const mesh = new Ammo.btTriangleMesh;
         mesh.setScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
-        for (let i = 0; i * 3 < indices.length; i++) {
+        for (let i = 0; i < indices.length / 3; ++i) {
             const a = indices[i * 3 + 0];
             const b = indices[i * 3 + 1];
             const c = indices[i * 3 + 2];
+            this._vectorCache[0].setValue(vertices[a * 3 + 0], vertices[a * 3 + 1], vertices[a * 3 + 2]);
+            this._vectorCache[1].setValue(vertices[b * 3 + 0], vertices[b * 3 + 1], vertices[b * 3 + 2]);
+            this._vectorCache[2].setValue(vertices[c * 3 + 0], vertices[c * 3 + 1], vertices[c * 3 + 2]);
             mesh.addTriangle(
-                new Ammo.btVector3(vertices[a * 3 + 0], vertices[a * 3 + 1], vertices[a * 3 + 2]),
-                new Ammo.btVector3(vertices[b * 3 + 0], vertices[b * 3 + 1], vertices[b * 3 + 2]),
-                new Ammo.btVector3(vertices[c * 3 + 0], vertices[c * 3 + 1], vertices[c * 3 + 2]),
+                this._vectorCache[0],
+                this._vectorCache[1],
+                this._vectorCache[2],
                 false
             );
         }
@@ -126,8 +131,9 @@ export class Engine {
 
         const shape = new Ammo.btConvexHullShape();
         shape.setLocalScaling(new Ammo.btVector3(scale[0], scale[1], scale[2]));
-        for (let i = 0; i < vertices.length / 3; i++) {
-            shape.addPoint(new Ammo.btVector3(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]));
+        for (let i = 0; i < vertices.length / 3; ++i) {
+            this._vectorCache[0].setValue(vertices[i * 3], vertices[i * 3 + 1], vertices[i * 3 + 2]);
+            shape.addPoint(this._vectorCache[0]);
         }
         shape.setMargin(0);
 
@@ -181,7 +187,7 @@ export class Engine {
         if (!this._sphere.isActive()) {
             this._sphere.activate();
         }
-        if (e.code === 'KeyS') {
+        if (e.code === 'KeyT') {
             this._sphere.setLinearVelocity(new Ammo.btVector3(controls.direction[0] * 5, 0, controls.direction[2] * 5));
         } else if (e.code === 'Space') {
             this._sphere.setLinearVelocity(new Ammo.btVector3(0, 5, 0));
@@ -190,15 +196,20 @@ export class Engine {
             this._sphere.setAngularVelocity(new Ammo.btVector3(0, 0, 0));
         } else if (e.code === 'KeyF') {
             console.log(controls.target);
+            console.log(controls.direction);
         }
     }
 
     private keyup(e) {
-        
+        if (e.keyCode === 83) {
+            
+        }
     }
 
     private keydown(e) {
-
+        if (e.keyCode === 83) {
+            
+        }
     }
 
     private loop(time) {
