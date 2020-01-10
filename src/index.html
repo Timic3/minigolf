@@ -9,21 +9,35 @@
   <div class="screen">
     <canvas id="game">WebGL not supported in this browser. Sorry!</canvas>
     <div id="overlay">
-        <!--<div id="menu">
+        <div id="screen__loading">
+            <h1>Loading the universe...</h1>
+            <h2 id="flow__loading"></h2>
+        </div>
+        <div id="screen__menu" hidden>
             <div class="selection">
                 <h1>Mini Golf</h1>
-                <h2>Start Game</h2>
-                <h2>Options</h2>
-                <h2>Exit</h2>
+                <h2 id="menu__start">Start Game</h2>
+                <h2 id="menu__options">Options</h2>
+                <h2 id="menu__exit">Exit</h2>
             </div>
-            <div class="party">
+            <!--<div class="party">
                 <h3>Party: <span id="queueType">Ranked</span><span id="queueSlots">2 / 8</span></h3>
                 <p>Timic3</p>
                 <p>RTX</p>
+            </div>-->
+            <div class="corner">
+                <h3>Mini Golf Alpha</h3>
             </div>
-        </div>-->
+        </div>
+        <div id="screen__game" hidden>
+
+        </div>
     </div>
   </div>
-  <img id="crate" src="./assets/crate.png" height="0"/>
+  <div id="dialog" hidden>
+      <h1 id="dialog__text"></h1>
+      <h2 id="dialog__yes_no" hidden><span id="dialog__yes">Yes</span><span id="dialog__no">No</span></h2>
+      <h2 id="dialog__ok" hidden><span id="dialog__okay">Okay</span></h2>
+  </div>
 </body>
 </html>

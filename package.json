@@ -7,7 +7,6 @@
     "@loaders.gl/core": "^2.0.0",
     "@loaders.gl/gltf": "^2.0.0",
     "ammo.js": "github:kripken/ammo.js",
-    "cannon": "^0.6.2",
     "gl-matrix": "^3.1.0",
     "orbit-controls": "^1.2.4"
   },
@@ -16,6 +15,7 @@
     "@types/gl-matrix": "^2.4.5",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.13.0",
+    "autoprefixer": "^9.7.3",
     "clean-webpack-plugin": "^3.0.0",
     "copy-webpack-plugin": "^5.1.1",
     "cross-env": "^6.0.3",
@@ -24,6 +24,7 @@
     "file-loader": "^5.0.2",
     "html-webpack-plugin": "^3.2.0",
     "node-sass": "^4.13.0",
+    "postcss-loader": "^3.0.0",
     "sass-loader": "^8.0.0",
     "style-loader": "^1.1.2",
     "ts-loader": "^6.2.1",
@@ -39,5 +40,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Timotej M. & Tilen P.",
-  "license": "ISC"
+  "license": "ISC",
+  "browserslist": [
+    "defaults",
+    "not ie < 11",
+    "last 2 versions",
+    "> 1%",
+    "iOS 7",
+    "last 3 iOS versions"
+  ]
 }

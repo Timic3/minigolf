@@ -2,9 +2,6 @@ import { gl } from "./WebGL";
 import { Shader } from "./Shader";
 
 import * as BasicShader from '../shaders/Basic';
-import * as TextureShader from '../shaders/Texture';
-import * as MetallicRoughnessShader from '../shaders/MetallicRoughness';
-import { mat4, vec3 } from "gl-matrix";
 
 export class Primitive {
     private _vao: WebGLVertexArrayObject;
