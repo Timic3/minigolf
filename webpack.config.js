@@ -1,12 +1,15 @@
 const path = require('path');
 const webpack = require('webpack');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const {
+  CleanWebpackPlugin
+} = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 
+const DEVELOPMENT = false;
+
 module.exports = {
-  mode: 'development',
-  // mode: 'production',
+  mode: DEVELOPMENT ? 'development' : 'production',
   entry: './src/scripts/index.ts',
   devtool: 'inline-source-map',
   node: {
@@ -23,8 +26,7 @@ module.exports = {
     hot: true,
   },
   module: {
-    rules: [
-      {
+    rules: [{
         test: /\.tsx?$/i,
         use: 'ts-loader',
         exclude: /node_modules/,
@@ -35,14 +37,17 @@ module.exports = {
           {
             loader: 'postcss-loader',
             options: {
-              sourceMap: true,
+              sourceMap: DEVELOPMENT,
               config: {
                 path: 'postcss.config.js'
               }
             }
           },
           {
-            loader: 'sass-loader', options: { sourceMap: true }
+            loader: 'sass-loader',
+            options: {
+              sourceMap: DEVELOPMENT
+            }
           }
         ],
       },
@@ -59,11 +64,17 @@ module.exports = {
       template: path.resolve(__dirname, 'src/index.html'),
       filename: 'index.html',
     }),
-    new CopyWebpackPlugin([
-      { from: './src/assets', to: 'assets' }
-    ]),
+    new CopyWebpackPlugin([{
+      from: './src/assets',
+      to: 'assets'
+    }]),
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+    },
   },
 };

@@ -6,7 +6,7 @@ import { UI } from './engine/utils/UI';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Ammo = require('ammo.js');
 
-(window as any).DEBUG = true;
+(window as any).DEBUG = false;
 
 window.onload = async () => {
     UI.flow('loading', 'Canvas');

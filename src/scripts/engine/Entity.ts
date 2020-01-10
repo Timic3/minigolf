@@ -36,8 +36,6 @@ export class Entity {
             postProcess: true,
         });
 
-        console.log(gltf);
-
         this.parseNodes(gltf.scene.nodes, engine);
         this._built = true;
     }
