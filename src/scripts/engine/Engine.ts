@@ -110,9 +110,9 @@ export class Engine {
 
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, shape, localInertia);
         const object = new Ammo.btRigidBody(rbInfo);
-        //object.setRestitution(5);
-        object.setFriction(1);
-        object.setRollingFriction(0.1);
+        object.setRestitution(1);
+        //object.setFriction(1);
+        //object.setRollingFriction(0.1);
 
         this._physicsWorld.addRigidBody(object);
     }
@@ -135,9 +135,9 @@ export class Engine {
 
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, shape, localInertia);
         const object = new Ammo.btRigidBody(rbInfo);
-        //object.setRestitution(5);
-        object.setFriction(1);
-        object.setRollingFriction(0.1);
+        object.setRestitution(1);
+        //object.setFriction(1);
+        //object.setRollingFriction(0.1);
 
         this._physicsWorld.addRigidBody(object);
     }
@@ -160,9 +160,10 @@ export class Engine {
         this._sphere.setCcdMotionThreshold(0.05);
         this._sphere.setCcdSweptSphereRadius(0.06);
         
-        //this._sphere.setRestitution(1);
-        this._sphere.setFriction(0.2);
-        this._sphere.setRollingFriction(0.1);
+        this._sphere.setRestitution(0.4);
+        //this._sphere.setFriction(0.2);
+        this._sphere.setDamping(0.5, 0.5);
+        //this._sphere.setRollingFriction(0.1);
 
         this._physicsWorld.addRigidBody(this._sphere);
     }
