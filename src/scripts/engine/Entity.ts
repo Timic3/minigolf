@@ -27,12 +27,8 @@ export class Entity {
 
     private _viewMatrix = mat4.create();
 
-    private _ballPositions: any = [-5, -5, -5];
+    private _ballPositions: any = [0, 0, 0];
     private _ballRotations: any = [0, 0, 0, 1];
-
-    /*constructor(url: string) {
-        this.initialize(url);
-    }*/
 
     public async initialize(url: string, engine) {
         const gltf = await load(url, GLTFLoader, {

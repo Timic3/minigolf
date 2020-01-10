@@ -7,6 +7,7 @@ enum DialogType {
 export class UI {
     public static currentScreen = 'loading';
     private static engine: Engine;
+    private static forceValue;
 
     public static initialize(engine) {
         document.getElementById('menu__start').addEventListener('click', () => {
@@ -20,6 +21,7 @@ export class UI {
         document.getElementById('menu__exit').addEventListener('click', () => {
             UI.dialog('Are you sure you want to exit?', DialogType.YES_NO, window.close);
         });
+        this.forceValue = document.getElementById('force__value');
 
         this.engine = engine;
     }
@@ -54,5 +56,12 @@ export class UI {
             });
         }
         document.getElementById('dialog').hidden = false;
+    }
+
+    public static force(ratio: number) {
+        if (this.forceValue) {
+            this.forceValue.style.transform = 'scaleY(' + ratio + ')';
+            // this.forceValue.style.webkitTransform = 'scaleY(' + ratio + ')';
+        }
     }
 }

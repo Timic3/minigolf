@@ -29,19 +29,8 @@ export class Primitive {
         if (material) {
             this._shader.define('HAS_MATERIALS');
             this._shader.define('MATERIAL_METALLICROUGHNESS');
-            //this._shader.define('MATERIAL_METALLICROUGHNESS');
-            //this._shader.define('USE_IBL');
         }
 
-        //if (colors) {
-        //} else if (material) {
-        //    this._shader = new Shader(MetallicRoughnessShader.vertexSource, MetallicRoughnessShader.fragmentSource);
-        //} else {
-         //   this._shader = new Shader(TextureShader.vertexSource, TextureShader.fragmentSource);
-        //}
-        //this._shader.use();
-        /*-0.9243900179862976, -0.3468450903892517, 0.15875054895877838*/
-        
         this._vao = gl.createVertexArray();
         gl.bindVertexArray(this._vao);
 
@@ -75,15 +64,6 @@ export class Primitive {
             gl.vertexAttribPointer(3, 4, gl.FLOAT, false, 0, 0);
             gl.bufferData(gl.ARRAY_BUFFER, colors.value, gl.STATIC_DRAW);
         }
-
-        /*node.texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, node.texture);
-        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image as TexImageSource);
-        gl.bindTexture(gl.TEXTURE_2D, null);*/
 
         // Indices
         this._indicesSize = indices.count;
@@ -153,16 +133,6 @@ export class Primitive {
         gl.uniformMatrix4fv(this._shader.getUniformLocation('uModel'), false, modelMatrix);
         gl.uniform3f(this._shader.getUniformLocation('uCamera'), cameraPosition[0], cameraPosition[1], cameraPosition[2]);
         
-        //gl.uniform3f(this._shader.getUniformLocation('u_LightDirection'), 78.45500946044922, -53.05121612548828, -383.6159973144531); // 246.43983459472656, -286.65008544921875, -115.0217056274414
-        //gl.uniform3f(this._shader.getUniformLocation('u_LightColor'), 1, 0.5699955821037292, 0.2395770400762558);
-        //gl.uniform3f(this._shader.getUniformLocation('u_LightColor'), 1, 0.5699955821037292, 0.2395770400762558);
-        //gl.uniform3f(this._shader.getUniformLocation('u_AmbientLightColor'), 1, 1, 1);
-        //gl.uniform1f(this._shader.getUniformLocation('u_AmbientLightIntensity'), 10);
-        
-
-        //gl.activeTexture(gl.TEXTURE0);
-        //gl.bindTexture(gl.TEXTURE_2D, this._nodes[0].texture);
         gl.drawElements(gl.TRIANGLES, this._indicesSize, gl.UNSIGNED_SHORT, 0);
-        //gl.drawArrays(gl.LINE_STRIP, 0, this._vertices.length / 3);
     }
 }

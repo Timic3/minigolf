@@ -11,11 +11,13 @@ const controls = require('orbit-controls')();
 let Ammo: any;
 
 enum State {
-    WAITING, MOVING, SHOOT, FINISHING
+    WAITING, MOVING, READY, SHOOTING, FINISHING
 }
 
 export class Engine {
     static TIME_STEP = 1.0 / 60.0;
+    static MAX_FORCE = 50;
+
     private _running = false;
 
     private _canvas: HTMLCanvasElement;
@@ -31,6 +33,9 @@ export class Engine {
     private _vectorCache;
 
     private _state = State.WAITING;
+
+    private _currentForce = 0;
+    private _forceDelta = 0.01;
 
     public constructor(elementId: string) {
         this._canvas = WebGL.initialize(elementId);
@@ -95,6 +100,9 @@ export class Engine {
     public run() {
         this._running = true;
         this.prepareLevel();
+
+        // Running out of time, maybe later
+        UI.dialog('Hold S to shoot or press R to reset.', 1, undefined);
     }
 
     public generateConcaveCollision(position, rotation, scale, vertices, indices, hole = false) {
@@ -127,15 +135,11 @@ export class Engine {
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, shape, localInertia);
         const object = new Ammo.btRigidBody(rbInfo);
         object.setRestitution(1);
-        //object.setFriction(1);
-        //object.setRollingFriction(0.1);
 
         if (hole) {
             const minAABB = new Ammo.btVector3();
             const maxAABB = new Ammo.btVector3();
             object.getAabb(minAABB, maxAABB);
-            //console.log(minAABB.x(), minAABB.y(), minAABB.z());
-            //console.log(maxAABB.x(), maxAABB.y(), maxAABB.z());
             Levels.ALL[(hole as any) - 1].holeAABB = [
                 [minAABB.x(), minAABB.y(), minAABB.z()],
                 [maxAABB.x(), maxAABB.y(), maxAABB.z()],
@@ -165,8 +169,6 @@ export class Engine {
         const rbInfo = new Ammo.btRigidBodyConstructionInfo(0, motionState, shape, localInertia);
         const object = new Ammo.btRigidBody(rbInfo);
         object.setRestitution(1);
-        //object.setFriction(1);
-        //object.setRollingFriction(0.1);
 
         this._physicsWorld.addRigidBody(object);
     }
@@ -196,19 +198,25 @@ export class Engine {
         this._sphere.setCcdSweptSphereRadius(0.06);
         
         this._sphere.setRestitution(0.4);
-        //this._sphere.setFriction(0.2);
         this._sphere.setDamping(0.5, 0.5);
-        //this._sphere.setRollingFriction(0.1);
 
         this._physicsWorld.addRigidBody(this._sphere);
     }
 
     private prepareLevel() {
         UI.flow('hole', 'Hole: ' + (Levels.CURRENT + 1));
-        Levels.ALL_STROKES += Levels.STROKES;
         Levels.STROKES = 0;
         UI.flow('strokes', 'Strokes: ' + Levels.STROKES);
-        UI.flow('all-strokes', 'All Strokes: ' + Levels.ALL_STROKES);
+
+        const personalBest = +localStorage.getItem('best');
+        if (personalBest) {
+            UI.flow('personal-best', 'Personal Best: ' + personalBest);
+        }
+
+        this.resetBall();
+    }
+
+    private resetBall() {
         controls.target = Levels.ALL[Levels.CURRENT].spawnpoint;
         controls.direction = Levels.ALL[Levels.CURRENT].direction;
         controls.position = [
@@ -236,7 +244,8 @@ export class Engine {
 
         this._scene.update(controls.target, [0, 0, 0, 1]);
         controls.update();
-        this._state = State.SHOOT;
+        
+        this._state = State.READY;
     }
 
     private isBallInHole() {
@@ -259,30 +268,54 @@ export class Engine {
         if (!this._sphere.isActive()) {
             this._sphere.activate();
         }
-        if (e.code === 'KeyT') {
-            this._sphere.setLinearVelocity(new Ammo.btVector3(controls.direction[0] * 5, 0, controls.direction[2] * 5));
-            this._state = State.MOVING;
-        } else if (e.code === 'Space') {
-            this._sphere.setLinearVelocity(new Ammo.btVector3(0, 5, 0));
-        } else if (e.code === 'KeyR') {
-            this._sphere.setLinearVelocity(new Ammo.btVector3(0, 0, 0));
-            this._sphere.setAngularVelocity(new Ammo.btVector3(0, 0, 0));
-        } else if (e.code === 'KeyF') {
-            console.log(controls.target);
-            console.log(controls.direction);
-            console.log(controls.up);
-        }
-    }
 
-    private keyup(e) {
-        if (e.keyCode === 83) {
-            
+        if (e.code === 'KeyR') {
+            this.resetBall();
+            UI.flow('strokes', 'Strokes: ' + ++Levels.STROKES);
+            UI.flow('all-strokes', 'All Strokes: ' + ++Levels.ALL_STROKES);
+        }
+
+        if ((window as any).DEBUG) {
+            if (e.code === 'KeyT') {
+                this._sphere.setLinearVelocity(new Ammo.btVector3(controls.direction[0] * 5, 0, controls.direction[2] * 5));
+                this._state = State.MOVING;
+            } else if (e.code === 'KeyZ') {
+                this._sphere.setLinearVelocity(new Ammo.btVector3(0, 0, 0));
+                this._sphere.setAngularVelocity(new Ammo.btVector3(0, 0, 0));
+                this._state = State.READY;
+            } else if (e.code === 'Space') {
+                this._sphere.setLinearVelocity(new Ammo.btVector3(0, 5, 0));
+                this._state = State.MOVING;
+            } else if (e.code === 'KeyF') {
+                console.log(controls.target);
+                console.log(controls.direction);
+                console.log(controls.up);
+            }
         }
     }
 
     private keydown(e) {
-        if (e.keyCode === 83) {
+        if (this._state === State.READY && e.keyCode === 83) {
+            this._state = State.SHOOTING;
+        }
+    }
+
+    private keyup(e) {
+        if (this._state === State.SHOOTING && e.keyCode === 83) {
+            this._state = State.MOVING;
+            this._sphere.setLinearVelocity(
+                new Ammo.btVector3(
+                    controls.direction[0] * (this._currentForce * Engine.MAX_FORCE),
+                    0,
+                    controls.direction[2] * (this._currentForce * Engine.MAX_FORCE)
+                )
+            );
+            this._currentForce = 0;
+            this._forceDelta = Math.abs(this._forceDelta);
+            UI.force(this._currentForce);
             
+            UI.flow('strokes', 'Strokes: ' + ++Levels.STROKES);
+            UI.flow('all-strokes', 'All Strokes: ' + ++Levels.ALL_STROKES);
         }
     }
 
@@ -290,6 +323,14 @@ export class Engine {
         // Clear the color buffer of the screen, otherwise we draw each frame on top of each other.
         gl.clearColor(0.37, 0.94, 1.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        if (this._state === State.SHOOTING) {
+            this._currentForce += this._forceDelta;
+            if (this._currentForce >= 1 || this._currentForce <= 0) {
+                this._forceDelta = -this._forceDelta;
+            }
+            UI.force(this._currentForce);
+        }
 
         if (this._running) {
             this._physicsWorld.stepSimulation(Engine.TIME_STEP, 2);
@@ -309,15 +350,24 @@ export class Engine {
                 if (this.isBallInHole()) {
                     this._state = State.FINISHING;
                     if (++Levels.CURRENT >= Levels.ALL.length) {
+                        const personalBest = +localStorage.getItem('best');
+                        if (!personalBest || (personalBest && Levels.ALL_STROKES < personalBest)) {
+                            localStorage.setItem('best', String(Levels.ALL_STROKES));
+                        }
+
                         Levels.CURRENT = 0;
+                        Levels.STROKES = 0;
+                        Levels.ALL_STROKES = 0;
+                        UI.flow('strokes', 'Strokes: ' + Levels.STROKES);
+                        UI.flow('all-strokes', 'All Strokes: ' + Levels.ALL_STROKES);
                     }
                     this.prepareLevel();
                 } else if (this._sphere.getLinearVelocity().dot(this._sphere.getAngularVelocity()) === 0) {
-                    this._state = State.SHOOT;
+                    this._state = State.READY;
                 }
             }
         } else {
-            if (controls.position[0] > -216) { // -216.25000000001847, 10, -36.24999999999767
+            if (controls.position[0] > -216) {
                 controls.position[0] -= 0.01;
                 controls.position[2] -= 0.01;
             }
