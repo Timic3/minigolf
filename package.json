@@ -11,7 +11,6 @@
     "orbit-controls": "^1.2.4"
   },
   "devDependencies": {
-    "@types/cannon": "^0.1.4",
     "@types/gl-matrix": "^2.4.5",
     "@typescript-eslint/eslint-plugin": "^2.13.0",
     "@typescript-eslint/parser": "^2.13.0",

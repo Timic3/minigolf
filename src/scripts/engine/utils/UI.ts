@@ -6,11 +6,12 @@ enum DialogType {
 
 export class UI {
     public static currentScreen = 'loading';
+    private static engine: Engine;
 
-    public static initialize() {
+    public static initialize(engine) {
         document.getElementById('menu__start').addEventListener('click', () => {
             this.screen('game');
-            Engine.RUNNING = true;
+            this.engine.run();
         });
         document.getElementById('menu__options').addEventListener('click', () => {
             // Not implemented yet
@@ -19,6 +20,8 @@ export class UI {
         document.getElementById('menu__exit').addEventListener('click', () => {
             UI.dialog('Are you sure you want to exit?', DialogType.YES_NO, window.close);
         });
+
+        this.engine = engine;
     }
 
     public static flow(element: string, information: string) {

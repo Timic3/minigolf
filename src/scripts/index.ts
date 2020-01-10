@@ -9,9 +9,9 @@ const Ammo = require('ammo.js');
 (window as any).DEBUG = true;
 
 window.onload = async () => {
-    UI.initialize();
     UI.flow('loading', 'Canvas');
     const engine = new Engine('game');
+    UI.initialize(engine);
     UI.flow('loading', 'Physics Engine');
     Ammo().then((Ammo) => {
         engine.start(Ammo);

@@ -10,9 +10,13 @@ const controls = require('orbit-controls')();
 
 let Ammo: any;
 
+enum State {
+    WAITING, MOVING, SHOOT
+}
+
 export class Engine {
     static TIME_STEP = 1.0 / 60.0;
-    static RUNNING = false;
+    private _running = false;
 
     private _canvas: HTMLCanvasElement;
 
@@ -23,8 +27,10 @@ export class Engine {
     private _wMatrix: mat4 = mat4.identity(mat4.create());
 
     private _physicsWorld;
-    private _currentTransformation;
+    private _transformCache;
     private _vectorCache;
+
+    private _state = State.WAITING;
 
     public constructor(elementId: string) {
         this._canvas = WebGL.initialize(elementId);
@@ -55,8 +61,8 @@ export class Engine {
         this._physicsWorld = new Ammo.btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
         this._physicsWorld.setGravity(new Ammo.btVector3(0, -9.82, 0));
 
-        this._currentTransformation = new Ammo.btTransform();
         this._vectorCache = [new Ammo.btVector3(), new Ammo.btVector3(), new Ammo.btVector3()];
+        this._transformCache = [new Ammo.btTransform(), new Ammo.btTransform()];
     }
 
     public async start(ammo) {
@@ -84,6 +90,11 @@ export class Engine {
 
         this.loop = this.loop.bind(this);
         requestAnimationFrame(this.loop);
+    }
+
+    public run() {
+        this._running = true;
+        this.prepareLevel();
     }
 
     public generateConcaveCollision(position, rotation, scale, vertices, indices) {
@@ -151,7 +162,13 @@ export class Engine {
     private generateBallCollision() {
         const transform = new Ammo.btTransform();
         transform.setIdentity();
-        transform.setOrigin(new Ammo.btVector3(Levels.ALL[3].spawnpoint[0], Levels.ALL[3].spawnpoint[1], Levels.ALL[3].spawnpoint[2]));
+        transform.setOrigin(
+            new Ammo.btVector3(
+                Levels.ALL[Levels.CURRENT].spawnpoint[0],
+                Levels.ALL[Levels.CURRENT].spawnpoint[1],
+                Levels.ALL[Levels.CURRENT].spawnpoint[2]
+            )
+        );
         transform.setRotation(new Ammo.btQuaternion(0, 0, 0, 1));
         const motionState = new Ammo.btDefaultMotionState(transform);
 
@@ -172,6 +189,33 @@ export class Engine {
         //this._sphere.setRollingFriction(0.1);
 
         this._physicsWorld.addRigidBody(this._sphere);
+    }
+
+    private prepareLevel() {
+        UI.flow('hole', 'Hole: ' + (Levels.CURRENT + 1));
+        Levels.ALL_STROKES += Levels.STROKES;
+        Levels.STROKES = 0;
+        UI.flow('strokes', 'Strokes: ' + Levels.STROKES);
+        UI.flow('all-strokes', 'All Strokes: ' + Levels.ALL_STROKES);
+        controls.target = Levels.ALL[Levels.CURRENT].spawnpoint;
+        controls.direction = Levels.ALL[Levels.CURRENT].direction;
+        controls.position = [
+            controls.target[0] - controls.direction[0],
+            controls.target[1] - controls.direction[1],
+            controls.target[2] - controls.direction[2]
+        ];
+        controls.update();
+        const motionState = this._sphere.getMotionState();
+        if (motionState) {
+            motionState.getWorldTransform(this._transformCache[1]);
+            this._transformCache[1].setOrigin(new Ammo.btVector3(Levels.ALL[Levels.CURRENT].spawnpoint));
+            this._transformCache[1].setRotation(new Ammo.btQuaternion(Levels.ALL[Levels.CURRENT].direction));
+            this._scene.update(controls.target, [0, 0, 0, 1]);
+        }
+    }
+
+    private checkHoleAABB() {
+        
     }
 
     private resize() {
@@ -197,6 +241,7 @@ export class Engine {
         } else if (e.code === 'KeyF') {
             console.log(controls.target);
             console.log(controls.direction);
+            console.log(controls.up);
         }
     }
 
@@ -217,16 +262,21 @@ export class Engine {
         gl.clearColor(0.37, 0.94, 1.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        if (Engine.RUNNING) {
+        if (this._running) {
             this._physicsWorld.stepSimulation(Engine.TIME_STEP, 2);
 
             const motionState = this._sphere.getMotionState();
             if (motionState) {
-                motionState.getWorldTransform(this._currentTransformation);
-                const p = this._currentTransformation.getOrigin();
-                const r = this._currentTransformation.getRotation();
+                motionState.getWorldTransform(this._transformCache[0]);
+                const p = this._transformCache[0].getOrigin();
+                const r = this._transformCache[0].getRotation();
                 controls.target = [p.x(), p.y(), p.z()];
                 this._scene.update(controls.target, [r.x(), r.y(), r.z(), r.w()]);
+            }
+
+            if (this._state === State.MOVING && this._sphere.getLinearVelocity().dot(this._sphere.getAngularVelocity())) {
+                this._state = State.WAITING;
+                this.checkHoleAABB();
             }
 
             controls.update();

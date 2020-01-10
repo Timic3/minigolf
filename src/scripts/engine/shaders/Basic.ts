@@ -1,3 +1,5 @@
+// PBR Shader by Khronos Group - modified a bit for our use
+
 export const vertexSource = `
 layout (location = 0) in vec3 aPosition;
 #ifdef HAS_NORMALS
