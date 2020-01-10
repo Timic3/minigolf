@@ -40,7 +40,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Timotej M. & Tilen P.",
-  "license": "ISC",
+  "license": "MIT",
   "browserslist": [
     "defaults",
     "not ie < 11",
